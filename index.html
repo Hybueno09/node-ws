@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form
+      action="javascript:void(0)"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="file" name="file" id="file" onchange="selectFile()" />
+      <input type="submit" name="submit" id="submit" />
+    </form>
+    <script>
+      const ws = new WebSocket('ws://localhost:8080/', 'echo-protocol');
+      ws.binaryType = 'arraybuffer';
+      ws.addEventListener('open', (ev) => {
+        ws.send('Hello Server');
+      });
+      ws.addEventListener('close', (ev) => {
+        ws.send('Close Server');
+      });
+      ws.addEventListener('message', (ev) => {
+        // ws.send('Message Server');
+        console.log(ev);
+      });
+      ws.addEventListener('error', (ev) => {
+        ws.send('Error Server');
+      });
+
+      function selectFile(file) {
+        console.log(file);
+      }
+      document.getElementById('submit').addEventListener('click', (e) => {
+        const file = document.getElementById('file');
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file.files[0]);
+        fileReader.onload = function (e) {
+          const rowData = e.target.result;
+          ws.send(rowData);
+        };
+        fileReader.onloadstart = () => {
+          console.log('onloadstart');
+        };
+        fileReader.onloadend = () => {
+          console.log('onloadend');
+        };
+        fileReader.onprogress = function (pro) {
+          // alert(22)
+          console.log(pro);
+        };
+      });
+    </script>
+  </body>
+</html>
